@@ -1,0 +1,157 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3337817786422736030
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2090818332889082924}
+  - component: {fileID: 696004034062739348}
+  - component: {fileID: 77759334505354929}
+  m_Layer: 0
+  m_Name: Building
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2090818332889082924
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3337817786422736030}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &696004034062739348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3337817786422736030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6750246b8d64e0942831a0037bb3c068, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buildDelay: 0.1
+  Width: 5
+  Depth: 5
+  buildingHeight: 5
+  continueRoof: 0
+  wallStyle:
+  - {fileID: 5415726247518659548, guid: c555c8829c5f6bb46b0d28aa42d2d6e9, type: 3}
+  roofStyle:
+  - {fileID: 4321679472419781530, guid: 4ea92264a6083df4e90e1fcf46aa6d54, type: 3}
+  - {fileID: 4321679472419781530, guid: 022530facbbf5c548a96b65286a54440, type: 3}
+  doorStyle:
+  - {fileID: 5415726247518659548, guid: 77f6ec9f5a3e7b34d8b9e8e15d1da9e4, type: 3}
+  windowStyle:
+  - {fileID: 2166766849096088462, guid: 980001f3731821644be46c2db8c10a90, type: 3}
+  - {fileID: 9047281989799601801, guid: 04d3e9e51eeab7d46a4e6c2b99f5e68f, type: 3}
+  - {fileID: 9047281989799601801, guid: 2abdde3dd47cd07469bdc19a6731a7a9, type: 3}
+  - {fileID: 9047281989799601801, guid: 8fe9065e77b101141a508a8ede300658, type: 3}
+  windowChance: 0.3
+  neonSignStyle:
+  - {fileID: 6796795383302844154, guid: 4f91150213bf8c743ab27617e519cb66, type: 3}
+  - {fileID: 6796795383302844154, guid: 98d796c87779d3b4099ac1d90feebeb8, type: 3}
+  - {fileID: 6796795383302844154, guid: 27af9f889e8e3b5478ae71c489610854, type: 3}
+  - {fileID: 6796795383302844154, guid: e901b593ba93a2d4ca1d051723ce3203, type: 3}
+  neonSignChance: 0.2
+  floorLevel: 0
+--- !u!114 &77759334505354929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3337817786422736030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd73b4deda410d41bebcc42218e4016, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabSets:
+  - wallPrefabs:
+    - {fileID: 5415726247518659548, guid: 799adc0f5b97d0e4a905d6af4b440602, type: 3}
+    doorPrefabs:
+    - {fileID: 5415726247518659548, guid: c5caec972c016cd48ba8332346d4ac49, type: 3}
+    windowPrefabs:
+    - {fileID: 2166766849096088462, guid: 1cd61e51200272a459869aa3bd530417, type: 3}
+    - {fileID: 9047281989799601801, guid: 7ca004995c6fe354f8989de420bb76fa, type: 3}
+    - {fileID: 9047281989799601801, guid: 912af0ef8ec65ec4996fc7389bbe8a94, type: 3}
+    - {fileID: 9047281989799601801, guid: c1c4fe74714030742bf190ce293fffd0, type: 3}
+    roofPrefabs:
+    - {fileID: 4321679472419781530, guid: 4f8f986cafa4fd64c92ade1ceef7f771, type: 3}
+    - {fileID: 4321679472419781530, guid: 6ceac835a8289f54e9a53c359b632201, type: 3}
+  - wallPrefabs:
+    - {fileID: 5415726247518659548, guid: 9ba10796f05c292479f4c27df28b03b1, type: 3}
+    doorPrefabs:
+    - {fileID: 5415726247518659548, guid: ff541d2f35f1a3148ae86ef2c57dbf49, type: 3}
+    windowPrefabs:
+    - {fileID: 2166766849096088462, guid: 080e24f2a20128e4685569af96cf228a, type: 3}
+    - {fileID: 9047281989799601801, guid: aba6dee362c585047bdbcd3cdffeb923, type: 3}
+    - {fileID: 9047281989799601801, guid: c4f43e0d932bcd042863151cf20c711b, type: 3}
+    - {fileID: 9047281989799601801, guid: 37ab3a7c00d277d4cb967b5afa3cf265, type: 3}
+    roofPrefabs:
+    - {fileID: 4321679472419781530, guid: 617b07d927ca58c4a953259de99fbba5, type: 3}
+    - {fileID: 4321679472419781530, guid: 267d60d926218e048b6c5bb31f242278, type: 3}
+  - wallPrefabs:
+    - {fileID: 5415726247518659548, guid: 3a72928389fa60c44a72d386a337b6b2, type: 3}
+    doorPrefabs:
+    - {fileID: 5415726247518659548, guid: 2e627aa1f81375a40a70a5f4458a08c9, type: 3}
+    windowPrefabs:
+    - {fileID: 2166766849096088462, guid: 98181f9b4f900104ab8e69e428618442, type: 3}
+    - {fileID: 9047281989799601801, guid: 9f0b4b5ac65e2a0409af446b89de3b95, type: 3}
+    - {fileID: 9047281989799601801, guid: 726fc08824a44a54ba126c1dc4c86944, type: 3}
+    - {fileID: 9047281989799601801, guid: aea120a80e30acf4eabce3ace746fab3, type: 3}
+    roofPrefabs:
+    - {fileID: 4321679472419781530, guid: 26b3a370a8fdd57438dd44b0518f0571, type: 3}
+    - {fileID: 4321679472419781530, guid: 0100d9bf68c644e45a24280a4d699e94, type: 3}
+  - wallPrefabs:
+    - {fileID: 5415726247518659548, guid: c555c8829c5f6bb46b0d28aa42d2d6e9, type: 3}
+    doorPrefabs:
+    - {fileID: 5415726247518659548, guid: 77f6ec9f5a3e7b34d8b9e8e15d1da9e4, type: 3}
+    windowPrefabs:
+    - {fileID: 2166766849096088462, guid: 980001f3731821644be46c2db8c10a90, type: 3}
+    - {fileID: 9047281989799601801, guid: 04d3e9e51eeab7d46a4e6c2b99f5e68f, type: 3}
+    - {fileID: 9047281989799601801, guid: 2abdde3dd47cd07469bdc19a6731a7a9, type: 3}
+    - {fileID: 9047281989799601801, guid: 8fe9065e77b101141a508a8ede300658, type: 3}
+    roofPrefabs:
+    - {fileID: 4321679472419781530, guid: 4ea92264a6083df4e90e1fcf46aa6d54, type: 3}
+    - {fileID: 4321679472419781530, guid: 022530facbbf5c548a96b65286a54440, type: 3}
+  - wallPrefabs:
+    - {fileID: 5415726247518659548, guid: ee80413978473df4f909d77294cff952, type: 3}
+    doorPrefabs:
+    - {fileID: 5415726247518659548, guid: 931bc1a7ec152bd4680fcffdf8596b67, type: 3}
+    windowPrefabs:
+    - {fileID: 2166766849096088462, guid: 3862f0ded3d05d147857ad75b1058b9d, type: 3}
+    - {fileID: 9047281989799601801, guid: a9ce7a6de102cf9458305e8ed24de4a7, type: 3}
+    - {fileID: 9047281989799601801, guid: ec06e69625698ea40b0f661cf5e5c576, type: 3}
+    - {fileID: 9047281989799601801, guid: f1419f9ab414e2642bec4a182d1d06dc, type: 3}
+    roofPrefabs:
+    - {fileID: 4321679472419781530, guid: b268ec9824c20614f8af46832c3f03a0, type: 3}
+    - {fileID: 4321679472419781530, guid: cf5ab2c0e4f712541b11e93e4c11f193, type: 3}
+  - wallPrefabs:
+    - {fileID: 5415726247518659548, guid: ee7883ef8664a35468a4877466ad8b43, type: 3}
+    doorPrefabs:
+    - {fileID: 5415726247518659548, guid: 2bf6a1215aa6262489d7aa8fcde32214, type: 3}
+    windowPrefabs:
+    - {fileID: 2166766849096088462, guid: 32491c4d2bc8b3d479ff151acc28275b, type: 3}
+    - {fileID: 9047281989799601801, guid: 0a015210ae2c59d41b16b4b5b32290ef, type: 3}
+    - {fileID: 9047281989799601801, guid: c5974061121916d4abea1c32e093a2a7, type: 3}
+    - {fileID: 9047281989799601801, guid: f877676ed8866a54ab798d41aff3e9ce, type: 3}
+    roofPrefabs:
+    - {fileID: 4321679472419781530, guid: 3224dcbb852109f4a9052433a26a4b1e, type: 3}
+    - {fileID: 4321679472419781530, guid: d6a24ce79ad27984596c50fd4671e83a, type: 3}
