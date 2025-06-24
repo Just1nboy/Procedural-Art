@@ -5,11 +5,17 @@ namespace Demo
 {
     public class GridCity : MonoBehaviour
     {
-        [Header("Grid Dimensions")]
-        public int rows = 10;
-        public int columns = 10;
-        public int rowWidth = 10;
-        public int columnWidth = 10;
+        [Header("City Layout")]
+        public int cityBlocks = 8;
+        public Vector2 blockSizeRange = new Vector2(40f, 60f);
+        public Vector2 streetWidthRange = new Vector2(3f, 5f);
+        public float mainStreetWidth = 6f;
+        public int mainStreetFrequency = 3;
+
+        [Header("Building Density")]
+        public Vector2 buildingsPerBlockRange = new Vector2(12, 20);
+        public float buildingSpacing = 0.5f;
+        public float blockMargin = 0.1f;
 
         [Header("Building Prefabs")]
         [Tooltip("Prefabs must have SimpleStock (with public Width/Depth/buildingHeight & continueRoof) + BuildingRandomizer")]
@@ -19,27 +25,28 @@ namespace Demo
         public float buildDelaySeconds = 0.1f;
 
         [Header("Footprint Bias")]
-        [Tooltip("Scale factor at the very edge of the grid")]
-        public float edgeScale = 0.5f;
-        [Tooltip("Scale factor at the exact center of the grid")]
-        public float centerScale = 2.0f;
+        [Tooltip("Scale factor at the very edge of the city")]
+        public float edgeScale = 0.8f;
+        [Tooltip("Scale factor at city center")]
+        public float centerScale = 1.5f;
 
         [Header("Variation")]
         [Tooltip("±random variation around base footprint & height (0 = none, 1 = ±100%)")]
         [Range(0f, 1f)]
-        public float sizeVariance = 0.2f;
+        public float sizeVariance = 0.6f;
 
         [Header("Height Multiplier")]
-        [Tooltip("Max extra stories relative to prefab (1 = no extra, up to 10×)")]
-        [Range(1f, 10f)]
-        public float maxHeightMultiplier = 3f;
+        [Tooltip("Max extra stories relative to prefab")]
+        [Range(1f, 100f)]
+        public float maxHeightMultiplier = 80f;
 
         [Header("Roof Continuation")]
-        [Tooltip("Chance the roof will recurse (continueRoof = true)")]
+        [Tooltip("Chance the roof will recurse")]
         [Range(0f, 1f)]
-        public float roofContinueChance = 0.4f;
+        public float roofContinueChance = 0.6f;
 
         void Start() => Generate();
+
         void Update()
         {
             if (Input.GetKeyDown(KeyCode.G))
@@ -57,61 +64,130 @@ namespace Demo
 
         void Generate()
         {
-            float centerRow = (rows - 1) * 0.5f;
-            float centerCol = (columns - 1) * 0.5f;
-            float maxDist = Mathf.Sqrt(centerRow * centerRow + centerCol * centerCol);
+            Vector2 cityCenter = new Vector2(cityBlocks * 0.5f, cityBlocks * 0.5f);
+            float maxDistFromCenter = Vector2.Distance(Vector2.zero, cityCenter);
 
-            for (int r = 0; r < rows; r++)
-                for (int c = 0; c < columns; c++)
+            float currentX = 0f;
+            for (int blockX = 0; blockX < cityBlocks; blockX++)
+            {
+                float currentZ = 0f;
+                float blockWidth = Random.Range(blockSizeRange.x, blockSizeRange.y);
+
+                for (int blockZ = 0; blockZ < cityBlocks; blockZ++)
                 {
-                    int pi = Random.Range(0, buildingPrefabs.Length);
-                    GameObject inst = Instantiate(buildingPrefabs[pi], transform);
+                    float blockDepth = Random.Range(blockSizeRange.x, blockSizeRange.y);
 
-                    inst.transform.localPosition = new Vector3(
-                        c * columnWidth,
-                        0,
-                        r * rowWidth
-                    );
+                    Vector2 blockCenter = new Vector2(currentX + blockWidth * 0.5f, currentZ + blockDepth * 0.5f);
 
-                    var stock = inst.GetComponent<SimpleStock>();
-                    if (stock != null)
-                    {
-                        stock.continueRoof = Random.value < roofContinueChance;
+                    GenerateBlock(blockCenter, blockWidth, blockDepth, cityCenter, maxDistFromCenter);
 
-                        int origW = stock.Width;
-                        int origD = stock.Depth;
-                        int origH = stock.buildingHeight;
-
-                        float dx = c - centerCol;
-                        float dz = r - centerRow;
-                        float distNorm = Mathf.Clamp01(Mathf.Sqrt(dx * dx + dz * dz) / maxDist);
-                        float t = 1f - distNorm;
-
-                        float baseFoot = Mathf.Lerp(edgeScale, centerScale, t);
-                        float varF = Random.Range(1f - sizeVariance, 1f + sizeVariance);
-                        stock.Width = Mathf.Max(1, Mathf.RoundToInt(origW * baseFoot * varF));
-                        stock.Depth = Mathf.Max(1, Mathf.RoundToInt(origD * baseFoot * varF));
-
-                        float baseH = Mathf.Lerp(1f, maxHeightMultiplier, t);
-                        float varH = Random.Range(1f - sizeVariance, 1f + sizeVariance);
-                        stock.buildingHeight = Mathf.Max(
-                            1,
-                            Mathf.RoundToInt(origH * baseH * varH)
-                        );
-                    }
-
-                    var rnd = inst.GetComponent<BuildingRandomizer>();
-                    if (rnd != null)
-                    {
-                        rnd.GenerateRandomBuilding();
-                    }
-                    else
-                    {
-                        var shape = inst.GetComponent<Shape>();
-                        if (shape != null)
-                            shape.Generate(buildDelaySeconds);
-                    }
+                    currentZ += blockDepth + GetStreetWidth(blockZ);
                 }
+                currentX += blockWidth + GetStreetWidth(blockX);
+            }
+        }
+
+        float GetStreetWidth(int index)
+        {
+            if (index % mainStreetFrequency == 0)
+                return mainStreetWidth;
+            return Random.Range(streetWidthRange.x, streetWidthRange.y);
+        }
+
+        void GenerateBlock(Vector2 blockCenter, float blockWidth, float blockDepth, Vector2 cityCenter, float maxDist)
+        {
+            GameObject blockParent = new GameObject($"Block_{blockCenter.x:F0}_{blockCenter.y:F0}");
+            blockParent.transform.parent = transform;
+            blockParent.transform.localPosition = new Vector3(blockCenter.x, 0, blockCenter.y);
+
+            int buildingCount = Random.Range((int)buildingsPerBlockRange.x, (int)buildingsPerBlockRange.y + 1);
+
+            float usableWidth = blockWidth - (blockMargin * 2);
+            float usableDepth = blockDepth - (blockMargin * 2);
+
+            PlaceBuildingsAlongPerimeter(blockParent, usableWidth, usableDepth, buildingCount, blockCenter, cityCenter, maxDist);
+        }
+
+        void PlaceBuildingsAlongPerimeter(GameObject blockParent, float width, float depth, int buildingCount, Vector2 blockPos, Vector2 cityCenter, float maxDist)
+        {
+            float perimeter = (width + depth) * 2;
+            float spacing = perimeter / buildingCount;
+
+            for (int i = 0; i < buildingCount; i++)
+            {
+                float distanceAlongPerimeter = i * spacing;
+                Vector3 localPos;
+                Quaternion rotation;
+
+                if (distanceAlongPerimeter < width)
+                {
+                    localPos = new Vector3(distanceAlongPerimeter - width * 0.5f, 0, -depth * 0.5f);
+                    rotation = Quaternion.Euler(0, 0, 0);
+                }
+                else if (distanceAlongPerimeter < width + depth)
+                {
+                    float alongDepth = distanceAlongPerimeter - width;
+                    localPos = new Vector3(width * 0.5f, 0, alongDepth - depth * 0.5f);
+                    rotation = Quaternion.Euler(0, 90, 0);
+                }
+                else if (distanceAlongPerimeter < width * 2 + depth)
+                {
+                    float alongWidth = distanceAlongPerimeter - width - depth;
+                    localPos = new Vector3(width * 0.5f - alongWidth, 0, depth * 0.5f);
+                    rotation = Quaternion.Euler(0, 180, 0);
+                }
+                else
+                {
+                    float alongDepth = distanceAlongPerimeter - width * 2 - depth;
+                    localPos = new Vector3(-width * 0.5f, 0, depth * 0.5f - alongDepth);
+                    rotation = Quaternion.Euler(0, 270, 0);
+                }
+
+                int prefabIndex = Random.Range(0, buildingPrefabs.Length);
+                GameObject buildingInstance = Instantiate(buildingPrefabs[prefabIndex], blockParent.transform);
+                buildingInstance.transform.localPosition = localPos;
+                buildingInstance.transform.localRotation = rotation;
+
+                ConfigureBuilding(buildingInstance, blockPos, cityCenter, maxDist);
+            }
+        }
+
+        void ConfigureBuilding(GameObject building, Vector2 blockPos, Vector2 cityCenter, float maxDist)
+        {
+            var stock = building.GetComponent<SimpleStock>();
+            if (stock != null)
+            {
+                stock.continueRoof = Random.value < roofContinueChance;
+
+                int origW = stock.Width;
+                int origD = stock.Depth;
+                int origH = stock.buildingHeight;
+
+                float distFromCenter = Vector2.Distance(blockPos, cityCenter);
+                float distanceRatio = 1f - Mathf.Clamp01(distFromCenter / maxDist);
+
+                float heightBias = Mathf.Lerp(2f, maxHeightMultiplier, distanceRatio * distanceRatio);
+                float sizeBias = Mathf.Lerp(edgeScale, centerScale, distanceRatio);
+
+                float sizeVar = Random.Range(1f - sizeVariance, 1f + sizeVariance);
+                float heightVar = Random.Range(1f - sizeVariance, 1f + sizeVariance);
+
+                stock.Width = Mathf.Max(1, Mathf.RoundToInt(origW * sizeBias * sizeVar));
+                stock.Depth = Mathf.Max(1, Mathf.RoundToInt(origD * sizeBias * sizeVar));
+                stock.buildingHeight = Mathf.Max(1, Mathf.RoundToInt(origH * heightBias * heightVar));
+            }
+
+            var randomizer = building.GetComponent<BuildingRandomizer>();
+            if (randomizer != null)
+            {
+                randomizer.GenerateRandomBuilding();
+            }
+            else
+            {
+                var shape = building.GetComponent<Shape>();
+                if (shape != null)
+                    shape.Generate(buildDelaySeconds);
+            }
         }
 
 #if UNITY_EDITOR
@@ -128,6 +204,5 @@ namespace Demo
             DestroyChildren();
         }
 #endif
-
     }
 }

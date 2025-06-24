@@ -487,6 +487,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &1436118361 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3337817786422736030, guid: 73cd433cd66781b4bb8e7e402faf6c06, type: 3}
+  m_PrefabInstance: {fileID: 5722328250634237267}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1488225409
 GameObject:
   m_ObjectHideFlags: 0
@@ -496,7 +501,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1488225411}
-  - component: {fileID: 1488225410}
+  - component: {fileID: 1488225412}
   m_Layer: 0
   m_Name: GridCity
   m_TagString: Untagged
@@ -504,30 +509,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1488225410
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1488225409}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e8ad99d00884b7498a210935e272453, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rows: 5
-  columns: 5
-  rowWidth: 15
-  columnWidth: 15
-  buildingPrefabs:
-  - {fileID: 3337817786422736030, guid: 73cd433cd66781b4bb8e7e402faf6c06, type: 3}
-  buildDelaySeconds: 0.1
-  edgeScale: 0.5
-  centerScale: 3
-  sizeVariance: 0.406
-  maxHeightMultiplier: 6.69
-  roofContinueChance: 0.4
 --- !u!4 &1488225411
 Transform:
   m_ObjectHideFlags: 0
@@ -543,6 +524,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1488225412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1488225409}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e8ad99d00884b7498a210935e272453, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cityBlocks: 2
+  blockSizeRange: {x: 15, y: 20}
+  streetWidthRange: {x: 6, y: 8}
+  mainStreetWidth: 10
+  mainStreetFrequency: 3
+  buildingsPerBlockRange: {x: 9, y: 12}
+  buildingSpacing: -2.11
+  blockMargin: 0
+  buildingPrefabs:
+  - {fileID: 1436118361}
+  buildDelaySeconds: 0.1
+  edgeScale: 1
+  centerScale: 10
+  sizeVariance: 0.6
+  maxHeightMultiplier: 100
+  roofContinueChance: 0.6
 --- !u!1001 &5722328250634237267
 PrefabInstance:
   m_ObjectHideFlags: 0
