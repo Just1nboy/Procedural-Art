@@ -536,21 +536,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e8ad99d00884b7498a210935e272453, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cityBlocks: 2
-  blockSizeRange: {x: 15, y: 20}
-  streetWidthRange: {x: 6, y: 8}
-  mainStreetWidth: 10
-  mainStreetFrequency: 3
-  buildingsPerBlockRange: {x: 9, y: 12}
-  buildingSpacing: -2.11
-  blockMargin: 0
+  citySize: 50
+  gridDivisions: 4
+  streetWidthPercent: 0.2
+  buildingDensity: 0.7
+  buildingSizeRange: {x: 0.8, y: 3.2}
   buildingPrefabs:
   - {fileID: 1436118361}
   buildDelaySeconds: 0.1
-  edgeScale: 1
-  centerScale: 10
-  sizeVariance: 0.6
-  maxHeightMultiplier: 100
+  maxHeightMultiplier: 5
+  centerHeightBoost: 0.8
+  sizeVariance: 0.2
   roofContinueChance: 0.6
 --- !u!1001 &5722328250634237267
 PrefabInstance:
