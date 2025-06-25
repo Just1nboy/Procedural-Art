@@ -536,10 +536,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e8ad99d00884b7498a210935e272453, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  citySize: 50
+  citySize: 90
   gridDivisions: 4
-  streetWidthPercent: 0.2
-  buildingDensity: 0.7
+  streetWidthPercent: 0.05
+  buildingDensity: 0.3
   buildingSizeRange: {x: 0.8, y: 3.2}
   buildingPrefabs:
   - {fileID: 1436118361}

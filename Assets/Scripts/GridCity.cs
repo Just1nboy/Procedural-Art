@@ -59,46 +59,51 @@ namespace Demo
 
         void Generate()
         {
-            if (buildingPrefabs == null || buildingPrefabs.Length == 0) return;
+            if (buildingPrefabs == null || buildingPrefabs.Length == 0)
+            {
+                Debug.LogError("No building prefabs assigned!");
+                return;
+            }
 
             blocks.Clear();
-            blockSize = (float)citySize / gridDivisions;
-            streetWidth = blockSize * streetWidthPercent;
 
-            Vector2 cityCenter = Vector2.zero;
-            float maxDistFromCenter = (gridDivisions * 0.5f) * blockSize;
+            streetWidth = citySize * streetWidthPercent;
+            blockSize = (citySize - streetWidth * (gridDivisions - 1)) / gridDivisions;
+
+            float halfCity = citySize * 0.5f;
+            float startPos = -halfCity + blockSize * 0.5f;
 
             for (int x = 0; x < gridDivisions; x++)
             {
                 for (int z = 0; z < gridDivisions; z++)
                 {
                     Vector2 blockCenter = new Vector2(
-                        (x - gridDivisions * 0.5f + 0.5f) * blockSize,
-                        (z - gridDivisions * 0.5f + 0.5f) * blockSize
+                        startPos + x * (blockSize + streetWidth),
+                        startPos + z * (blockSize + streetWidth)
                     );
 
-                    float distFromCenter = Vector2.Distance(blockCenter, cityCenter);
-                    float centerFactor = 1f - (distFromCenter / maxDistFromCenter);
-                    centerFactor = Mathf.Clamp01(centerFactor);
+                    float distanceFromCenter = Vector2.Distance(blockCenter, Vector2.zero);
+                    float maxDistance = Vector2.Distance(Vector2.zero, new Vector2(halfCity, halfCity));
+                    float centerFactor = 1f - (distanceFromCenter / maxDistance);
 
                     GridBlock block = new GridBlock
                     {
                         center = blockCenter,
-                        size = blockSize - streetWidth,
+                        size = blockSize,
                         centerFactor = centerFactor
                     };
-
                     blocks.Add(block);
-                    GenerateBlockBuildings(block);
+
+                    GenerateBuildingsForBlock(block);
                 }
             }
         }
 
-        void GenerateBlockBuildings(GridBlock block)
+        void GenerateBuildingsForBlock(GridBlock block)
         {
-            GameObject blockParent = new GameObject($"Block_{blocks.Count}");
-            blockParent.transform.SetParent(transform);
-            blockParent.transform.localPosition = new Vector3(block.center.x, 0, block.center.y);
+            GameObject blockParent = new GameObject($"Block_{block.center.x:F1}_{block.center.y:F1}");
+            blockParent.transform.parent = transform;
+            blockParent.transform.position = new Vector3(block.center.x, 0, block.center.y);
 
             float buildableSize = block.size * 0.85f;
             float minBuildingSize = buildableSize * buildingSizeRange.x / 8f;
@@ -175,7 +180,7 @@ namespace Demo
                             size = buildingSize,
                             rect = buildingRect,
                             prefabIndex = prefabIndex,
-                            rotation = baseRotation + Random.Range(-15f, 15f)
+                            rotation = baseRotation
                         });
                     }
                 }
