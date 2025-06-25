@@ -1,21 +1,21 @@
 ﻿using UnityEngine;
 using Demo;
+using System.Collections.Generic;
 
 namespace Demo
 {
     public class GridCity : MonoBehaviour
     {
         [Header("City Layout")]
-        public int cityBlocks = 8;
-        public Vector2 blockSizeRange = new Vector2(40f, 60f);
-        public Vector2 streetWidthRange = new Vector2(3f, 5f);
-        public float mainStreetWidth = 6f;
-        public int mainStreetFrequency = 3;
+        public int citySize = 100;
+        public int clusterCount = 12;
+        public Vector2 clusterSizeRange = new Vector2(15f, 25f);
+        public float streetWidth = 2f;
 
         [Header("Building Density")]
-        public Vector2 buildingsPerBlockRange = new Vector2(12, 20);
-        public float buildingSpacing = 0.5f;
-        public float blockMargin = 0.1f;
+        public Vector2 buildingsPerClusterRange = new Vector2(8, 15);
+        public float minBuildingSpacing = 0.1f;
+        public Vector2 buildingSizeRange = new Vector2(2f, 6f);
 
         [Header("Building Prefabs")]
         [Tooltip("Prefabs must have SimpleStock (with public Width/Depth/buildingHeight & continueRoof) + BuildingRandomizer")]
@@ -26,14 +26,14 @@ namespace Demo
 
         [Header("Footprint Bias")]
         [Tooltip("Scale factor at the very edge of the city")]
-        public float edgeScale = 0.8f;
+        public float edgeScale = 0.6f;
         [Tooltip("Scale factor at city center")]
-        public float centerScale = 1.5f;
+        public float centerScale = 1.2f;
 
         [Header("Variation")]
         [Tooltip("±random variation around base footprint & height (0 = none, 1 = ±100%)")]
         [Range(0f, 1f)]
-        public float sizeVariance = 0.6f;
+        public float sizeVariance = 0.4f;
 
         [Header("Height Multiplier")]
         [Tooltip("Max extra stories relative to prefab")]
@@ -44,6 +44,9 @@ namespace Demo
         [Tooltip("Chance the roof will recurse")]
         [Range(0f, 1f)]
         public float roofContinueChance = 0.6f;
+
+        private List<ClusterInfo> clusters = new List<ClusterInfo>();
+        private Vector2 cityCenter;
 
         void Start() => Generate();
 
@@ -64,130 +67,209 @@ namespace Demo
 
         void Generate()
         {
-            Vector2 cityCenter = new Vector2(cityBlocks * 0.5f, cityBlocks * 0.5f);
-            float maxDistFromCenter = Vector2.Distance(Vector2.zero, cityCenter);
+            cityCenter = new Vector2(citySize * 0.5f, citySize * 0.5f);
+            clusters.Clear();
 
-            float currentX = 0f;
-            for (int blockX = 0; blockX < cityBlocks; blockX++)
+            GenerateClusters();
+
+            foreach (var cluster in clusters)
             {
-                float currentZ = 0f;
-                float blockWidth = Random.Range(blockSizeRange.x, blockSizeRange.y);
-
-                for (int blockZ = 0; blockZ < cityBlocks; blockZ++)
-                {
-                    float blockDepth = Random.Range(blockSizeRange.x, blockSizeRange.y);
-
-                    Vector2 blockCenter = new Vector2(currentX + blockWidth * 0.5f, currentZ + blockDepth * 0.5f);
-
-                    GenerateBlock(blockCenter, blockWidth, blockDepth, cityCenter, maxDistFromCenter);
-
-                    currentZ += blockDepth + GetStreetWidth(blockZ);
-                }
-                currentX += blockWidth + GetStreetWidth(blockX);
+                GenerateClusterBuildings(cluster);
             }
         }
 
-        float GetStreetWidth(int index)
+        void GenerateClusters()
         {
-            if (index % mainStreetFrequency == 0)
-                return mainStreetWidth;
-            return Random.Range(streetWidthRange.x, streetWidthRange.y);
+            int attempts = 0;
+            int maxAttempts = clusterCount * 10;
+
+            while (clusters.Count < clusterCount && attempts < maxAttempts)
+            {
+                attempts++;
+
+                Vector2 center = new Vector2(
+                    Random.Range(streetWidth, citySize - streetWidth),
+                    Random.Range(streetWidth, citySize - streetWidth)
+                );
+
+                float size = Random.Range(clusterSizeRange.x, clusterSizeRange.y);
+
+                ClusterInfo newCluster = new ClusterInfo
+                {
+                    center = center,
+                    size = size,
+                    bounds = new Rect(
+                        center.x - size * 0.5f,
+                        center.y - size * 0.5f,
+                        size,
+                        size
+                    )
+                };
+
+                bool validPosition = true;
+                foreach (var existingCluster in clusters)
+                {
+                    float distance = Vector2.Distance(center, existingCluster.center);
+                    float minDistance = (size + existingCluster.size) * 0.5f + streetWidth;
+
+                    if (distance < minDistance)
+                    {
+                        validPosition = false;
+                        break;
+                    }
+                }
+
+                if (validPosition)
+                {
+                    clusters.Add(newCluster);
+                }
+            }
         }
 
-        void GenerateBlock(Vector2 blockCenter, float blockWidth, float blockDepth, Vector2 cityCenter, float maxDist)
+        void GenerateClusterBuildings(ClusterInfo cluster)
         {
-            GameObject blockParent = new GameObject($"Block_{blockCenter.x:F0}_{blockCenter.y:F0}");
-            blockParent.transform.parent = transform;
-            blockParent.transform.localPosition = new Vector3(blockCenter.x, 0, blockCenter.y);
+            GameObject clusterParent = new GameObject($"Cluster_{cluster.center.x:F0}_{cluster.center.y:F0}");
+            clusterParent.transform.parent = transform;
+            clusterParent.transform.localPosition = new Vector3(cluster.center.x, 0, cluster.center.y);
 
-            int buildingCount = Random.Range((int)buildingsPerBlockRange.x, (int)buildingsPerBlockRange.y + 1);
+            float distFromCenter = Vector2.Distance(cluster.center, cityCenter);
+            float maxDist = citySize * 0.7f;
+            float distanceRatio = 1f - Mathf.Clamp01(distFromCenter / maxDist);
 
-            float usableWidth = blockWidth - (blockMargin * 2);
-            float usableDepth = blockDepth - (blockMargin * 2);
+            float buildingCountMultiplier = Mathf.Lerp(1.2f, 0.4f, distanceRatio);
+            int baseBuildingCount = Random.Range((int)buildingsPerClusterRange.x, (int)buildingsPerClusterRange.y + 1);
+            int buildingCount = Mathf.Max(2, Mathf.RoundToInt(baseBuildingCount * buildingCountMultiplier));
 
-            PlaceBuildingsAlongPerimeter(blockParent, usableWidth, usableDepth, buildingCount, blockCenter, cityCenter, maxDist);
-        }
-
-        void PlaceBuildingsAlongPerimeter(GameObject blockParent, float width, float depth, int buildingCount, Vector2 blockPos, Vector2 cityCenter, float maxDist)
-        {
-            float perimeter = (width + depth) * 2;
-            float spacing = perimeter / buildingCount;
+            List<BuildingPlacement> placements = new List<BuildingPlacement>();
 
             for (int i = 0; i < buildingCount; i++)
             {
-                float distanceAlongPerimeter = i * spacing;
-                Vector3 localPos;
-                Quaternion rotation;
-
-                if (distanceAlongPerimeter < width)
+                BuildingPlacement placement = GenerateBuildingPlacement(cluster, placements, distanceRatio);
+                if (placement != null)
                 {
-                    localPos = new Vector3(distanceAlongPerimeter - width * 0.5f, 0, -depth * 0.5f);
-                    rotation = Quaternion.Euler(0, 0, 0);
+                    placements.Add(placement);
+                    CreateBuildingFromPlacement(clusterParent, placement, cluster);
                 }
-                else if (distanceAlongPerimeter < width + depth)
-                {
-                    float alongDepth = distanceAlongPerimeter - width;
-                    localPos = new Vector3(width * 0.5f, 0, alongDepth - depth * 0.5f);
-                    rotation = Quaternion.Euler(0, 90, 0);
-                }
-                else if (distanceAlongPerimeter < width * 2 + depth)
-                {
-                    float alongWidth = distanceAlongPerimeter - width - depth;
-                    localPos = new Vector3(width * 0.5f - alongWidth, 0, depth * 0.5f);
-                    rotation = Quaternion.Euler(0, 180, 0);
-                }
-                else
-                {
-                    float alongDepth = distanceAlongPerimeter - width * 2 - depth;
-                    localPos = new Vector3(-width * 0.5f, 0, depth * 0.5f - alongDepth);
-                    rotation = Quaternion.Euler(0, 270, 0);
-                }
-
-                int prefabIndex = Random.Range(0, buildingPrefabs.Length);
-                GameObject buildingInstance = Instantiate(buildingPrefabs[prefabIndex], blockParent.transform);
-                buildingInstance.transform.localPosition = localPos;
-                buildingInstance.transform.localRotation = rotation;
-
-                ConfigureBuilding(buildingInstance, blockPos, cityCenter, maxDist);
             }
         }
 
-        void ConfigureBuilding(GameObject building, Vector2 blockPos, Vector2 cityCenter, float maxDist)
+        BuildingPlacement GenerateBuildingPlacement(ClusterInfo cluster, List<BuildingPlacement> existingPlacements, float distanceRatio)
         {
-            var stock = building.GetComponent<SimpleStock>();
+            int maxAttempts = 50;
+
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                Vector2 localPos = new Vector2(
+                    Random.Range(-cluster.size * 0.4f, cluster.size * 0.4f),
+                    Random.Range(-cluster.size * 0.4f, cluster.size * 0.4f)
+                );
+
+                float baseSizeMultiplier = Mathf.Lerp(1f, 2.5f, distanceRatio);
+                Vector2 sizeRange = new Vector2(
+                    buildingSizeRange.x * baseSizeMultiplier,
+                    buildingSizeRange.y * baseSizeMultiplier
+                );
+
+                Vector2 size = new Vector2(
+                    Random.Range(sizeRange.x, sizeRange.y),
+                    Random.Range(sizeRange.x, sizeRange.y)
+                );
+
+                float sizeBias = Mathf.Lerp(edgeScale, centerScale, distanceRatio);
+
+                size *= sizeBias;
+                size *= Random.Range(1f - sizeVariance, 1f + sizeVariance);
+
+                Rect buildingRect = new Rect(
+                    localPos.x - size.x * 0.5f,
+                    localPos.y - size.y * 0.5f,
+                    size.x,
+                    size.y
+                );
+
+                bool validPlacement = true;
+                foreach (var existing in existingPlacements)
+                {
+                    Rect expandedExisting = new Rect(
+                        existing.rect.x - minBuildingSpacing,
+                        existing.rect.y - minBuildingSpacing,
+                        existing.rect.width + minBuildingSpacing * 2,
+                        existing.rect.height + minBuildingSpacing * 2
+                    );
+
+                    if (buildingRect.Overlaps(expandedExisting))
+                    {
+                        validPlacement = false;
+                        break;
+                    }
+                }
+
+                if (validPlacement)
+                {
+                    int prefabIndex = Random.Range(0, buildingPrefabs.Length);
+                    return new BuildingPlacement
+                    {
+                        localPosition = localPos,
+                        size = size,
+                        rect = buildingRect,
+                        prefabIndex = prefabIndex,
+                        rotation = Random.Range(0, 4) * 90f
+                    };
+                }
+            }
+
+            return null;
+        }
+
+        void CreateBuildingFromPlacement(GameObject parent, BuildingPlacement placement, ClusterInfo cluster)
+        {
+            GameObject buildingInstance = Instantiate(buildingPrefabs[placement.prefabIndex], parent.transform);
+            buildingInstance.transform.localPosition = new Vector3(placement.localPosition.x, 0, placement.localPosition.y);
+            buildingInstance.transform.localRotation = Quaternion.Euler(0, placement.rotation, 0);
+
+            var stock = buildingInstance.GetComponent<SimpleStock>();
             if (stock != null)
             {
                 stock.continueRoof = Random.value < roofContinueChance;
 
-                int origW = stock.Width;
-                int origD = stock.Depth;
-                int origH = stock.buildingHeight;
-
-                float distFromCenter = Vector2.Distance(blockPos, cityCenter);
+                float distFromCenter = Vector2.Distance(cluster.center, cityCenter);
+                float maxDist = citySize * 0.7f;
                 float distanceRatio = 1f - Mathf.Clamp01(distFromCenter / maxDist);
-
                 float heightBias = Mathf.Lerp(2f, maxHeightMultiplier, distanceRatio * distanceRatio);
-                float sizeBias = Mathf.Lerp(edgeScale, centerScale, distanceRatio);
-
-                float sizeVar = Random.Range(1f - sizeVariance, 1f + sizeVariance);
                 float heightVar = Random.Range(1f - sizeVariance, 1f + sizeVariance);
 
-                stock.Width = Mathf.Max(1, Mathf.RoundToInt(origW * sizeBias * sizeVar));
-                stock.Depth = Mathf.Max(1, Mathf.RoundToInt(origD * sizeBias * sizeVar));
-                stock.buildingHeight = Mathf.Max(1, Mathf.RoundToInt(origH * heightBias * heightVar));
+                stock.Width = Mathf.Max(1, Mathf.RoundToInt(placement.size.x));
+                stock.Depth = Mathf.Max(1, Mathf.RoundToInt(placement.size.y));
+                stock.buildingHeight = Mathf.Max(1, Mathf.RoundToInt(stock.buildingHeight * heightBias * heightVar));
             }
 
-            var randomizer = building.GetComponent<BuildingRandomizer>();
+            var randomizer = buildingInstance.GetComponent<BuildingRandomizer>();
             if (randomizer != null)
             {
                 randomizer.GenerateRandomBuilding();
             }
             else
             {
-                var shape = building.GetComponent<Shape>();
+                var shape = buildingInstance.GetComponent<Shape>();
                 if (shape != null)
                     shape.Generate(buildDelaySeconds);
             }
+        }
+
+        private class ClusterInfo
+        {
+            public Vector2 center;
+            public float size;
+            public Rect bounds;
+        }
+
+        private class BuildingPlacement
+        {
+            public Vector2 localPosition;
+            public Vector2 size;
+            public Rect rect;
+            public int prefabIndex;
+            public float rotation;
         }
 
 #if UNITY_EDITOR
@@ -202,6 +284,22 @@ namespace Demo
         public void ClearCity()
         {
             DestroyChildren();
+        }
+#endif
+
+#if UNITY_EDITOR
+        void OnDrawGizmosSelected()
+        {
+            if (clusters != null)
+            {
+                Gizmos.color = Color.yellow;
+                foreach (var cluster in clusters)
+                {
+                    Vector3 center = new Vector3(cluster.center.x, 0, cluster.center.y);
+                    Vector3 size = new Vector3(cluster.size, 0.1f, cluster.size);
+                    Gizmos.DrawWireCube(center, size);
+                }
+            }
         }
 #endif
     }
