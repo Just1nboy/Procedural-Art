@@ -19,6 +19,8 @@ namespace Demo
         [Header("Building Prefabs")]
         public GameObject[] buildingPrefabs;
 
+
+
         [Header("Build Delay")]
         public float buildDelaySeconds = 0.1f;
 
@@ -97,6 +99,134 @@ namespace Demo
                     GenerateBuildingsForBlock(block);
                 }
             }
+
+            GenerateRoads();
+        }
+
+        void GenerateRoads()
+        {
+            GameObject roadParent = new GameObject("Roads");
+            roadParent.transform.parent = transform;
+
+            float halfCity = citySize * 0.5f;
+            float startPos = -halfCity + blockSize * 0.5f;
+
+            for (int x = 0; x < gridDivisions - 1; x++)
+            {
+                for (int z = 0; z < gridDivisions; z++)
+                {
+                    GameObject road = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    road.transform.parent = roadParent.transform;
+                    road.name = $"Road_Vertical_{x}_{z}";
+
+                    float roadX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+                    float roadZ = startPos + z * (blockSize + streetWidth);
+
+                    road.transform.position = new Vector3(roadX, 0.05f, roadZ);
+                    road.transform.localScale = new Vector3(streetWidth, 0.1f, blockSize);
+
+                    road.GetComponent<Renderer>().material.color = Color.gray;
+                }
+            }
+
+            for (int x = 0; x < gridDivisions; x++)
+            {
+                for (int z = 0; z < gridDivisions - 1; z++)
+                {
+                    GameObject road = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    road.transform.parent = roadParent.transform;
+                    road.name = $"Road_Horizontal_{x}_{z}";
+
+                    float roadX = startPos + x * (blockSize + streetWidth);
+                    float roadZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+
+                    road.transform.position = new Vector3(roadX, 0.05f, roadZ);
+                    road.transform.localScale = new Vector3(blockSize, 0.1f, streetWidth);
+
+                    road.GetComponent<Renderer>().material.color = Color.gray;
+                }
+            }
+
+            for (int x = 0; x < gridDivisions - 1; x++)
+            {
+                for (int z = 0; z < gridDivisions - 1; z++)
+                {
+                    GameObject intersection = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    intersection.transform.parent = roadParent.transform;
+                    intersection.name = $"Intersection_{x}_{z}";
+
+                    float intersectionX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+                    float intersectionZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+
+                    intersection.transform.position = new Vector3(intersectionX, 0.05f, intersectionZ);
+                    intersection.transform.localScale = new Vector3(streetWidth, 0.1f, streetWidth);
+
+                    intersection.GetComponent<Renderer>().material.color = Color.gray;
+                }
+            }
+        }
+
+        void CreateBasicRoads()
+        {
+            GameObject roadParent = new GameObject("Basic Roads");
+            roadParent.transform.parent = transform;
+
+            float halfCity = citySize * 0.5f;
+            float startPos = -halfCity + blockSize * 0.5f;
+
+            for (int x = 0; x < gridDivisions - 1; x++)
+            {
+                for (int z = 0; z < gridDivisions; z++)
+                {
+                    GameObject road = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    road.transform.parent = roadParent.transform;
+                    road.name = $"Road_Vertical_{x}_{z}";
+
+                    float roadX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+                    float roadZ = startPos + z * (blockSize + streetWidth);
+
+                    road.transform.position = new Vector3(roadX, 0.05f, roadZ);
+                    road.transform.localScale = new Vector3(streetWidth, 0.1f, blockSize);
+
+                    road.GetComponent<Renderer>().material.color = Color.gray;
+                }
+            }
+
+            for (int x = 0; x < gridDivisions; x++)
+            {
+                for (int z = 0; z < gridDivisions - 1; z++)
+                {
+                    GameObject road = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    road.transform.parent = roadParent.transform;
+                    road.name = $"Road_Horizontal_{x}_{z}";
+
+                    float roadX = startPos + x * (blockSize + streetWidth);
+                    float roadZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+
+                    road.transform.position = new Vector3(roadX, 0.05f, roadZ);
+                    road.transform.localScale = new Vector3(blockSize, 0.1f, streetWidth);
+
+                    road.GetComponent<Renderer>().material.color = Color.gray;
+                }
+            }
+
+            for (int x = 0; x < gridDivisions - 1; x++)
+            {
+                for (int z = 0; z < gridDivisions - 1; z++)
+                {
+                    GameObject intersection = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    intersection.transform.parent = roadParent.transform;
+                    intersection.name = $"Intersection_{x}_{z}";
+
+                    float intersectionX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+                    float intersectionZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+
+                    intersection.transform.position = new Vector3(intersectionX, 0.05f, intersectionZ);
+                    intersection.transform.localScale = new Vector3(streetWidth, 0.1f, streetWidth);
+
+                    intersection.GetComponent<Renderer>().material.color = Color.gray;
+                }
+            }
         }
 
         void GenerateBuildingsForBlock(GridBlock block)
@@ -115,10 +245,10 @@ namespace Demo
             int buildingsPerSide = Mathf.RoundToInt(buildingDensity * 4f) + 2;
 
             Vector2[] edges = {
-                new Vector2(0, 1),   // Top
-                new Vector2(1, 0),   // Right  
-                new Vector2(0, -1),  // Bottom
-                new Vector2(-1, 0)   // Left
+                new Vector2(0, 1),
+                new Vector2(1, 0),
+                new Vector2(0, -1),
+                new Vector2(-1, 0)
             };
 
             float[] rotations = { 180f, 270f, 0f, 90f };
@@ -145,41 +275,31 @@ namespace Demo
                     Vector2 buildingSize = (edgeIndex % 2 == 0) ?
                         new Vector2(size, depth) : new Vector2(depth, size);
 
-                    Rect buildingRect = new Rect(
+                    Rect rect = new Rect(
                         localPos.x - buildingSize.x * 0.5f,
                         localPos.y - buildingSize.y * 0.5f,
                         buildingSize.x,
                         buildingSize.y
                     );
 
-                    bool validPlacement = true;
-                    float minSpacing = Mathf.Min(buildingSize.x, buildingSize.y) * 0.1f;
-
+                    bool overlaps = false;
                     foreach (var existing in placements)
                     {
-                        Rect expandedExisting = new Rect(
-                            existing.rect.x - minSpacing,
-                            existing.rect.y - minSpacing,
-                            existing.rect.width + minSpacing * 2,
-                            existing.rect.height + minSpacing * 2
-                        );
-
-                        if (buildingRect.Overlaps(expandedExisting))
+                        if (rect.Overlaps(existing.rect))
                         {
-                            validPlacement = false;
+                            overlaps = true;
                             break;
                         }
                     }
 
-                    if (validPlacement)
+                    if (!overlaps)
                     {
-                        int prefabIndex = Random.Range(0, buildingPrefabs.Length);
                         placements.Add(new BuildingPlacement
                         {
                             localPosition = localPos,
                             size = buildingSize,
-                            rect = buildingRect,
-                            prefabIndex = prefabIndex,
+                            rect = rect,
+                            prefabIndex = Random.Range(0, buildingPrefabs.Length),
                             rotation = baseRotation
                         });
                     }
@@ -269,6 +389,34 @@ namespace Demo
                 Gizmos.color = Color.red;
                 Vector3 cityBounds = new Vector3(citySize, 0.1f, citySize);
                 Gizmos.DrawWireCube(Vector3.zero, cityBounds);
+
+                Gizmos.color = Color.blue;
+                float halfCity = citySize * 0.5f;
+                float startPos = -halfCity + blockSize * 0.5f;
+
+                for (int x = 0; x < gridDivisions - 1; x++)
+                {
+                    for (int z = 0; z < gridDivisions; z++)
+                    {
+                        float roadX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+                        float roadZ = startPos + z * (blockSize + streetWidth);
+                        Vector3 roadCenter = new Vector3(roadX, 0, roadZ);
+                        Vector3 roadSize = new Vector3(streetWidth, 0.1f, blockSize);
+                        Gizmos.DrawWireCube(roadCenter, roadSize);
+                    }
+                }
+
+                for (int x = 0; x < gridDivisions; x++)
+                {
+                    for (int z = 0; z < gridDivisions - 1; z++)
+                    {
+                        float roadX = startPos + x * (blockSize + streetWidth);
+                        float roadZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+                        Vector3 roadCenter = new Vector3(roadX, 0, roadZ);
+                        Vector3 roadSize = new Vector3(blockSize, 0.1f, streetWidth);
+                        Gizmos.DrawWireCube(roadCenter, roadSize);
+                    }
+                }
             }
         }
 #endif
