@@ -539,8 +539,6 @@ MonoBehaviour:
   citySize: 90
   gridDivisions: 4
   streetWidthPercent: 0.05
-  blockOffsetAmount: 0.3
-  blockRotationAmount: 0.2
   buildingDensity: 0.3
   buildingSizeRange: {x: 0.8, y: 3.2}
   buildingPrefabs:
