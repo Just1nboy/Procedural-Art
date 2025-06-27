@@ -240,7 +240,7 @@ namespace Demo
         {
             GameObject blockParent = new GameObject($"Block_{block.center.x:F1}_{block.center.y:F1}");
             blockParent.transform.parent = transform;
-            blockParent.transform.position = new Vector3(block.center.x, 0, block.center.y);
+            blockParent.transform.position = new Vector3(block.center.x, 0.5f, block.center.y);
 
             float buildableSize = block.size * 0.85f;
             float minBuildingSize = buildableSize * buildingSizeRange.x / 8f;
@@ -361,7 +361,7 @@ namespace Demo
             propParent.transform.parent = transform;
 
             float startPos = -citySize * 0.5f;
-            float sidewalkOffset = streetWidth * 0.4f;
+            float roadOffset = streetWidth * 0.15f;
 
             for (int x = 0; x < gridDivisions - 1; x++)
             {
@@ -370,14 +370,14 @@ namespace Demo
                     float roadCenterX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
                     float roadZ = startPos + z * (blockSize + streetWidth);
 
-                    int propsPerSide = Mathf.RoundToInt(blockSize / propSpacing * propDensity);
+                    int propsPerSide = Mathf.RoundToInt(blockSize / propSpacing * propDensity * 2f);
 
                     for (int p = 0; p < propsPerSide; p++)
                     {
-                        if (Random.value < 0.8f)
+                        if (Random.value < 0.95f)
                         {
-                            float propX = roadCenterX + sidewalkOffset;
-                            float propZ = roadZ + (p + Random.Range(-0.3f, 0.3f)) * (blockSize / propsPerSide);
+                            float propX = roadCenterX + Random.Range(-streetWidth * 0.3f, streetWidth * 0.3f);
+                            float propZ = roadZ + (p + Random.Range(-0.4f, 0.4f)) * (blockSize / propsPerSide);
 
                             GameObject prop = Instantiate(streetPropPrefabs[Random.Range(0, streetPropPrefabs.Length)]);
                             prop.transform.parent = propParent.transform;
@@ -385,9 +385,9 @@ namespace Demo
                             prop.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
                         }
 
-                        if (Random.value < 0.8f)
+                        if (Random.value < 0.3f)
                         {
-                            float propX = roadCenterX - sidewalkOffset;
+                            float propX = roadCenterX + roadOffset;
                             float propZ = roadZ + (p + Random.Range(-0.3f, 0.3f)) * (blockSize / propsPerSide);
 
                             GameObject prop = Instantiate(streetPropPrefabs[Random.Range(0, streetPropPrefabs.Length)]);
@@ -406,14 +406,14 @@ namespace Demo
                     float roadX = startPos + x * (blockSize + streetWidth);
                     float roadCenterZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
 
-                    int propsPerSide = Mathf.RoundToInt(blockSize / propSpacing * propDensity);
+                    int propsPerSide = Mathf.RoundToInt(blockSize / propSpacing * propDensity * 2f);
 
                     for (int p = 0; p < propsPerSide; p++)
                     {
-                        if (Random.value < 0.8f)
+                        if (Random.value < 0.95f)
                         {
-                            float propX = roadX + (p + Random.Range(-0.3f, 0.3f)) * (blockSize / propsPerSide);
-                            float propZ = roadCenterZ + sidewalkOffset;
+                            float propX = roadX + (p + Random.Range(-0.4f, 0.4f)) * (blockSize / propsPerSide);
+                            float propZ = roadCenterZ + Random.Range(-streetWidth * 0.3f, streetWidth * 0.3f);
 
                             GameObject prop = Instantiate(streetPropPrefabs[Random.Range(0, streetPropPrefabs.Length)]);
                             prop.transform.parent = propParent.transform;
@@ -421,10 +421,10 @@ namespace Demo
                             prop.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
                         }
 
-                        if (Random.value < 0.8f)
+                        if (Random.value < 0.3f)
                         {
                             float propX = roadX + (p + Random.Range(-0.3f, 0.3f)) * (blockSize / propsPerSide);
-                            float propZ = roadCenterZ - sidewalkOffset;
+                            float propZ = roadCenterZ + roadOffset;
 
                             GameObject prop = Instantiate(streetPropPrefabs[Random.Range(0, streetPropPrefabs.Length)]);
                             prop.transform.parent = propParent.transform;
@@ -439,14 +439,18 @@ namespace Demo
             {
                 for (int z = 0; z < gridDivisions - 1; z++)
                 {
-                    if (Random.value < propDensity)
-                    {
-                        float intersectionX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
-                        float intersectionZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+                    float intersectionX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+                    float intersectionZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
 
+                    if (Random.value < 0.7f)
+                    {
                         GameObject prop = Instantiate(streetPropPrefabs[Random.Range(0, streetPropPrefabs.Length)]);
                         prop.transform.parent = propParent.transform;
-                        prop.transform.position = new Vector3(intersectionX + Random.Range(-streetWidth * 0.2f, streetWidth * 0.2f), 0.1f, intersectionZ + Random.Range(-streetWidth * 0.2f, streetWidth * 0.2f));
+                        prop.transform.position = new Vector3(
+                            intersectionX + Random.Range(-streetWidth * 0.3f, streetWidth * 0.3f),
+                            0.1f,
+                            intersectionZ + Random.Range(-streetWidth * 0.3f, streetWidth * 0.3f)
+                        );
                         prop.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
                     }
                 }
