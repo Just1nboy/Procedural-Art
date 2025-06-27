@@ -42,6 +42,12 @@ namespace Demo
         private float blockSize;
         private float streetWidth;
 
+        [Header("Street Props")]
+        public GameObject[] streetPropPrefabs;
+        [Range(0f, 1f)]
+        public float propDensity = 0.3f;
+        public float propSpacing = 5f;
+
         void Start() => Generate();
 
         void Update()
@@ -101,70 +107,71 @@ namespace Demo
             }
 
             GenerateRoads();
+            GenerateStreetProps();
         }
 
         void GenerateRoads()
-{
-    GameObject roadParent = new GameObject("Roads");
-    roadParent.transform.parent = transform;
-
-    float halfCity = citySize * 0.5f;
-    float startPos = -halfCity + blockSize * 0.5f;
-
-    for (int x = 0; x < gridDivisions - 1; x++)
-    {
-        for (int z = 0; z < gridDivisions; z++)
         {
-            GameObject road = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            road.transform.parent = roadParent.transform;
-            road.name = $"Road_Vertical_{x}_{z}";
+            GameObject roadParent = new GameObject("Roads");
+            roadParent.transform.parent = transform;
 
-            float roadX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
-            float roadZ = startPos + z * (blockSize + streetWidth);
+            float halfCity = citySize * 0.5f;
+            float startPos = -halfCity + blockSize * 0.5f;
 
-            road.transform.position = new Vector3(roadX, 0.05f, roadZ);
-            road.transform.localScale = new Vector3(streetWidth, 0.1f, blockSize);
+            for (int x = 0; x < gridDivisions - 1; x++)
+            {
+                for (int z = 0; z < gridDivisions; z++)
+                {
+                    GameObject road = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    road.transform.parent = roadParent.transform;
+                    road.name = $"Road_Vertical_{x}_{z}";
 
-            road.GetComponent<Renderer>().sharedMaterial.color = Color.gray;
+                    float roadX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+                    float roadZ = startPos + z * (blockSize + streetWidth);
+
+                    road.transform.position = new Vector3(roadX, 0.05f, roadZ);
+                    road.transform.localScale = new Vector3(streetWidth, 0.1f, blockSize);
+
+                    road.GetComponent<Renderer>().sharedMaterial.color = Color.gray;
+                }
+            }
+
+            for (int x = 0; x < gridDivisions; x++)
+            {
+                for (int z = 0; z < gridDivisions - 1; z++)
+                {
+                    GameObject road = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    road.transform.parent = roadParent.transform;
+                    road.name = $"Road_Horizontal_{x}_{z}";
+
+                    float roadX = startPos + x * (blockSize + streetWidth);
+                    float roadZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+
+                    road.transform.position = new Vector3(roadX, 0.05f, roadZ);
+                    road.transform.localScale = new Vector3(blockSize, 0.1f, streetWidth);
+
+                    road.GetComponent<Renderer>().sharedMaterial.color = Color.gray;
+                }
+            }
+
+            for (int x = 0; x < gridDivisions - 1; x++)
+            {
+                for (int z = 0; z < gridDivisions - 1; z++)
+                {
+                    GameObject intersection = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    intersection.transform.parent = roadParent.transform;
+                    intersection.name = $"Intersection_{x}_{z}";
+
+                    float intersectionX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+                    float intersectionZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+
+                    intersection.transform.position = new Vector3(intersectionX, 0.05f, intersectionZ);
+                    intersection.transform.localScale = new Vector3(streetWidth, 0.1f, streetWidth);
+
+                    intersection.GetComponent<Renderer>().sharedMaterial.color = Color.gray;
+                }
+            }
         }
-    }
-
-    for (int x = 0; x < gridDivisions; x++)
-    {
-        for (int z = 0; z < gridDivisions - 1; z++)
-        {
-            GameObject road = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            road.transform.parent = roadParent.transform;
-            road.name = $"Road_Horizontal_{x}_{z}";
-
-            float roadX = startPos + x * (blockSize + streetWidth);
-            float roadZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
-
-            road.transform.position = new Vector3(roadX, 0.05f, roadZ);
-            road.transform.localScale = new Vector3(blockSize, 0.1f, streetWidth);
-
-            road.GetComponent<Renderer>().sharedMaterial.color = Color.gray;
-        }
-    }
-
-    for (int x = 0; x < gridDivisions - 1; x++)
-    {
-        for (int z = 0; z < gridDivisions - 1; z++)
-        {
-            GameObject intersection = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            intersection.transform.parent = roadParent.transform;
-            intersection.name = $"Intersection_{x}_{z}";
-
-            float intersectionX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
-            float intersectionZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
-
-            intersection.transform.position = new Vector3(intersectionX, 0.05f, intersectionZ);
-            intersection.transform.localScale = new Vector3(streetWidth, 0.1f, streetWidth);
-
-            intersection.GetComponent<Renderer>().sharedMaterial.color = Color.gray;
-        }
-    }
-}
 
         void CreateBasicRoads()
         {
@@ -343,6 +350,106 @@ namespace Demo
                 var shape = buildingInstance.GetComponent<Shape>();
                 if (shape != null)
                     shape.Generate(buildDelaySeconds);
+            }
+        }
+
+        void GenerateStreetProps()
+        {
+            if (streetPropPrefabs == null || streetPropPrefabs.Length == 0) return;
+
+            GameObject propParent = new GameObject("StreetProps");
+            propParent.transform.parent = transform;
+
+            float startPos = -citySize * 0.5f;
+            float sidewalkOffset = streetWidth * 0.4f;
+
+            for (int x = 0; x < gridDivisions - 1; x++)
+            {
+                for (int z = 0; z < gridDivisions; z++)
+                {
+                    float roadCenterX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+                    float roadZ = startPos + z * (blockSize + streetWidth);
+
+                    int propsPerSide = Mathf.RoundToInt(blockSize / propSpacing * propDensity);
+
+                    for (int p = 0; p < propsPerSide; p++)
+                    {
+                        if (Random.value < 0.8f)
+                        {
+                            float propX = roadCenterX + sidewalkOffset;
+                            float propZ = roadZ + (p + Random.Range(-0.3f, 0.3f)) * (blockSize / propsPerSide);
+
+                            GameObject prop = Instantiate(streetPropPrefabs[Random.Range(0, streetPropPrefabs.Length)]);
+                            prop.transform.parent = propParent.transform;
+                            prop.transform.position = new Vector3(propX, 0.1f, propZ);
+                            prop.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+                        }
+
+                        if (Random.value < 0.8f)
+                        {
+                            float propX = roadCenterX - sidewalkOffset;
+                            float propZ = roadZ + (p + Random.Range(-0.3f, 0.3f)) * (blockSize / propsPerSide);
+
+                            GameObject prop = Instantiate(streetPropPrefabs[Random.Range(0, streetPropPrefabs.Length)]);
+                            prop.transform.parent = propParent.transform;
+                            prop.transform.position = new Vector3(propX, 0.1f, propZ);
+                            prop.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+                        }
+                    }
+                }
+            }
+
+            for (int x = 0; x < gridDivisions; x++)
+            {
+                for (int z = 0; z < gridDivisions - 1; z++)
+                {
+                    float roadX = startPos + x * (blockSize + streetWidth);
+                    float roadCenterZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+
+                    int propsPerSide = Mathf.RoundToInt(blockSize / propSpacing * propDensity);
+
+                    for (int p = 0; p < propsPerSide; p++)
+                    {
+                        if (Random.value < 0.8f)
+                        {
+                            float propX = roadX + (p + Random.Range(-0.3f, 0.3f)) * (blockSize / propsPerSide);
+                            float propZ = roadCenterZ + sidewalkOffset;
+
+                            GameObject prop = Instantiate(streetPropPrefabs[Random.Range(0, streetPropPrefabs.Length)]);
+                            prop.transform.parent = propParent.transform;
+                            prop.transform.position = new Vector3(propX, 0.1f, propZ);
+                            prop.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+                        }
+
+                        if (Random.value < 0.8f)
+                        {
+                            float propX = roadX + (p + Random.Range(-0.3f, 0.3f)) * (blockSize / propsPerSide);
+                            float propZ = roadCenterZ - sidewalkOffset;
+
+                            GameObject prop = Instantiate(streetPropPrefabs[Random.Range(0, streetPropPrefabs.Length)]);
+                            prop.transform.parent = propParent.transform;
+                            prop.transform.position = new Vector3(propX, 0.1f, propZ);
+                            prop.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+                        }
+                    }
+                }
+            }
+
+            for (int x = 0; x < gridDivisions - 1; x++)
+            {
+                for (int z = 0; z < gridDivisions - 1; z++)
+                {
+                    if (Random.value < propDensity)
+                    {
+                        float intersectionX = startPos + x * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+                        float intersectionZ = startPos + z * (blockSize + streetWidth) + blockSize * 0.5f + streetWidth * 0.5f;
+
+                        GameObject prop = Instantiate(streetPropPrefabs[Random.Range(0, streetPropPrefabs.Length)]);
+                        prop.transform.parent = propParent.transform;
+                        prop.transform.position = new Vector3(intersectionX + Random.Range(-streetWidth * 0.2f, streetWidth * 0.2f), 0.1f, intersectionZ + Random.Range(-streetWidth * 0.2f, streetWidth * 0.2f));
+                        prop.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+                    }
+                }
             }
         }
 

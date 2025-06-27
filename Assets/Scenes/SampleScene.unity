@@ -548,6 +548,21 @@ MonoBehaviour:
   centerHeightBoost: 0.8
   sizeVariance: 0.2
   roofContinueChance: 0.6
+  streetPropPrefabs:
+  - {fileID: 5484419416109214606, guid: bb26bbde46f7c0f4c9c39076f4d96b09, type: 3}
+  - {fileID: 1203648767672174455, guid: 588b9569fb673844cad980a3efd764fa, type: 3}
+  - {fileID: 8986761488531814748, guid: d6d1e0823daa0b348bd1eca6f3dbc568, type: 3}
+  - {fileID: 3353754533595375675, guid: 4cb6cee2cd91e364095b024f5b45fce5, type: 3}
+  - {fileID: 1601438469910858331, guid: 353af58ba584050439507366b2e1dec0, type: 3}
+  - {fileID: 9113153382081239937, guid: 36d3d0d2ae12c2742b61b3e9f8672973, type: 3}
+  - {fileID: 4791765299771062460, guid: 254669c66670770498b2506d68b7e5da, type: 3}
+  - {fileID: 6954809296737887293, guid: 044a0aa6550cd3a408c017f36238d564, type: 3}
+  - {fileID: 8771335909897162906, guid: 0cefda902b8c4d2408e8e0db299762ab, type: 3}
+  - {fileID: 337395004396792895, guid: c930687c79806e945bf857cd476a1500, type: 3}
+  - {fileID: 8953846571501526886, guid: 8f9b48efa0c391147b131ff2296b2b14, type: 3}
+  - {fileID: 3926771255324187826, guid: 60e65eaed04526d4db908a62320e5367, type: 3}
+  propDensity: 0.82
+  propSpacing: 5
 --- !u!1 &1744528761
 GameObject:
   m_ObjectHideFlags: 0
